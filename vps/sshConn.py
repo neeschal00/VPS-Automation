@@ -1,5 +1,6 @@
 from paramiko import SSHClient, AutoAddPolicy
 from paramiko.config import SSH_PORT
+from scp import SCPClient
 import requests
 from typing import Any, Sequence
 import logging
@@ -25,6 +26,7 @@ class SSHVPS:
         self.username = username
         self.password = password
         self.port = port
+        self.scp_client = None
 
 
     def createConnection(self):
@@ -34,6 +36,16 @@ class SSHVPS:
         self.connection.connect(self.ipadd,self.port,self.username,self.password)
         print(self.connection)
 
+    def secureCopy(self,local_path,recursive=False,remote_path=None):
+        if not self.scp_client:
+            self.scp_client = SCPClient(self.connection.get_transport()) #opening the socket channel to transfer files/ folders
+        self.scp_client.put(local_path,remote_path=remote_path,recursive=recursive)      #transfer to remote host
+
+    def secureDownload(self,remote_path,local_path,recursive=False):
+        if not self.scp_client:
+            self.scp_client = SCPClient(self.connection.get_transport()) #opening the socket channel to transfer files/ folders
+
+        self.scp_client.get(remote_path=remote_path,local_path=local_path,recursive=recursive)
 
 
     def execCmd(self,cmd:str):
