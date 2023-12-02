@@ -37,9 +37,13 @@ class SSHVPS:
 
 
     def execCmd(self,cmd:str):
-        cmdOutput = self.connection.exec_command(cmd)
-        print(type(cmdOutput))
-        return cmdOutput
+        stdin, stdout, stderr = self.connection.exec_command(cmd)
+        output = stdout.read().decode('utf-8')
+        error = stderr.read().decode('utf-8')
+        print(output)
+        print(error)
+        print(stdin)
+        return stdout
 
 
 
@@ -47,7 +51,7 @@ if __name__ == "__main__":
 
     sh = SSHVPS("172.18.223.202","neeschal17","kells17")
     sh.createConnection()
-    print(sh.execCmd("free"))
+    print(sh.execCmd("ps aux"))
 
 
 
