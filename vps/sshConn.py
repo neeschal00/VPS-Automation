@@ -8,7 +8,7 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-file_handler = logging.FileHandler("sshLogs")
+file_handler = logging.FileHandler("sshLogs.log")
 file_handler.setLevel(logging.DEBUG)
 
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
@@ -30,11 +30,10 @@ class SSHVPS:
 
 
     def createConnection(self):
-
+        # need to create connection to use any else command
         self.connection = SSHClient()
         self.connection.set_missing_host_key_policy(AutoAddPolicy())
         self.connection.connect(self.ipadd,self.port,self.username,self.password)
-        print(self.connection)
 
     def secureCopy(self,local_path,recursive=False,remote_path=None):
         if not self.scp_client:
@@ -49,20 +48,31 @@ class SSHVPS:
 
 
     def execCmd(self,cmd:str):
-        stdin, stdout, stderr = self.connection.exec_command(cmd)
-        output = stdout.read().decode('utf-8')
-        error = stderr.read().decode('utf-8')
-        print(output)
-        print(error)
-        print(stdin)
-        return stdout
+        try:
+            stdin, stdout, stderr = self.connection.exec_command(cmd)
+            output = stdout.read().decode('utf-8')
+            error = stderr.read().decode('utf-8')
+
+            logger.info("Execution sucess for cmd: " + cmd)
+            return {
+                "success": True,
+                "output": output,
+                "error": error
+            }
+        except Exception as e:
+            logger.error("Error occured while executing cmd: " +str(e))
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
 
 
 
 if __name__ == "__main__":
 
     sh = SSHVPS("172.18.223.202","neeschal17","kells17")
-    sh.createConnection()
+    sh.createConnection() 
     print(sh.execCmd("ps aux"))
 
 
