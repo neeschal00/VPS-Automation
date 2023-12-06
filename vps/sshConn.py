@@ -47,7 +47,7 @@ class SSHVPS:
         self.scp_client.get(remote_path=remote_path,local_path=local_path,recursive=recursive)
 
 
-    def execCmd(self,cmd:str):
+    def execCmd(self,cmd:str)-> dict:
         try:
             stdin, stdout, stderr = self.connection.exec_command(cmd)
             output = stdout.read().decode('utf-8')
@@ -66,9 +66,17 @@ class SSHVPS:
                 "error": str(e)
             }
 
+    def getServerInfo(self)->str:
+        cmd = "uname -r"
+        try:
+            stdin, stdout, stderr = self.connection.exec_command(cmd)
+            output = stdout.read().decode('utf-8')
 
-
-
+            logger.info("Execution sucess for cmd: " + cmd)
+            return output
+        except Exception as e:
+            logger.error("Error occured while executing cmd: " +str(e))
+            return "Error: " + str(e)
 if __name__ == "__main__":
 
     sh = SSHVPS("172.18.223.202","neeschal17","kells17")
