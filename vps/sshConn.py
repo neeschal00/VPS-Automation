@@ -67,7 +67,7 @@ class SSHVPS:
             }
 
     def getServerInfo(self)->str:
-        cmd = "uname -r"
+        cmd = "uname -a"
         try:
             stdin, stdout, stderr = self.connection.exec_command(cmd)
             output = stdout.read().decode('utf-8')
@@ -77,6 +77,7 @@ class SSHVPS:
         except Exception as e:
             logger.error("Error occured while executing cmd: " +str(e))
             return "Error: " + str(e)
+        
 if __name__ == "__main__":
 
     sh = SSHVPS("172.18.223.202","neeschal17","kells17")
