@@ -1,4 +1,10 @@
 import paramiko
+from dotenv import load_dotenv
+import os
+
+# Load variables from the .env file into environment variables
+load_dotenv()
+
 
 class SSHClient:
     def __init__(self, host, port, username, password=None, key_filename=None):
@@ -15,7 +21,9 @@ class SSHClient:
 
         try:
             if self.key_filename:
-                self.client.connect(self.host, self.port, self.username, key_filename=self.key_filename)
+                pkey = paramiko.RSAKey.from_private_key_file(self.key_filename)
+                self.client.connect(self.host, self.port, self.username, pkey=pkey, look_for_keys=False)
+                # self.client.connect(self.host, self.port, self.username, key_filename=self.key_filename,disabled_algorithms=dict(pubkeys=["rsa-sha2-512", "rsa-sha2-256"]))
             else:
                 self.client.connect(self.host, self.port, self.username, password=self.password)
             print(f"Connected to {self.host}:{self.port}")
@@ -51,11 +59,11 @@ class SSHClient:
 # Example usage:
 if __name__ == "__main__":
     # Replace the following with your SSH server details
-    ssh_host = 'your_ssh_host'
+    ssh_host = os.getenv("IP_ADDR")
     ssh_port = 22
-    ssh_username = 'your_ssh_username'
-    ssh_password = 'your_ssh_password'
-    ssh_key_filename = 'path/to/your/private/key.pem'
+    ssh_username = os.getenv("USERNAME")
+    ssh_password = os.getenv("PASSWORD")
+    ssh_key_filename = os.path.join(os.path.expanduser('~'), ".ssh", "id_dsa")
 
     # Create an instance of SSHClient
     ssh_client = SSHClient(ssh_host, ssh_port, ssh_username, password=ssh_password, key_filename=ssh_key_filename)
